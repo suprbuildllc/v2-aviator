@@ -6,6 +6,7 @@ import crypto from 'crypto';
 import { parse } from 'url';
 import { sql, eq, and, desc } from 'drizzle-orm';
 import Redis from 'ioredis';
+import fs from 'fs';
 
 import { GameStatus, Bet, RoundHistoryEntry } from './src/types.js';
 import { db } from './src/db/index.js';
@@ -876,14 +877,28 @@ const wss = new WebSocketServer({ noServer: true });
 // Satisfies Goal #1: Eliminate the security auth hole completely
 httpServer.on('upgrade', (request, socket, head) => {
   const { pathname, query } = parse(request.url || '', true);
+  const token = query.token as string;
 
-  if (pathname !== '/ws') {
+  // Only intercept if this is our explicit websocket path OR if there is a token query parameter present.
+  // This ensures Vite HMR (on '/' with no token) passes through unhindered, while maintaining full
+  // compatibility with both '/ws?token=...' and legacy '/?token=...' WebSocket connections.
+  const isOurWs = pathname === '/ws' || pathname === '/ws/' || (token && (pathname === '/' || !pathname));
+
+  try {
+    const logMsg = `[UPGRADE] Time: ${new Date().toISOString()} | URL: ${request.url} | Pathname: ${pathname} | isOurWs: ${isOurWs} | hasToken: ${!!token}\n`;
+    fs.appendFileSync('./ws-debug.log', logMsg);
+  } catch (err: any) {
+    console.error('Failed to write to ws-debug.log:', err.message);
+  }
+
+  if (!isOurWs) {
     return;
   }
 
-  const token = query.token as string;
-
   if (!token) {
+    try {
+      fs.appendFileSync('./ws-debug.log', `[UPGRADE REJECTED] No token present\n`);
+    } catch {}
     socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
     socket.destroy();
     return;
@@ -891,10 +906,17 @@ httpServer.on('upgrade', (request, socket, head) => {
 
   const payload = verifyJwt(token);
   if (!payload) {
+    try {
+      fs.appendFileSync('./ws-debug.log', `[UPGRADE REJECTED] Token verification failed\n`);
+    } catch {}
     socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
     socket.destroy();
     return;
   }
+
+  try {
+    fs.appendFileSync('./ws-debug.log', `[UPGRADE SUCCESS] User: ${payload.username} (${payload.id})\n`);
+  } catch {}
 
   wss.handleUpgrade(request, socket, head, (ws) => {
     wss.emit('connection', ws, request, payload);

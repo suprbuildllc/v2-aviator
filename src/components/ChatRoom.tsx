@@ -51,7 +51,7 @@ export default function ChatRoom({ chatLog, playerName, onSendMessage }: ChatRoo
       {/* Chat Messages */}
       <div 
         ref={scrollRef}
-        className="flex-1 overflow-y-auto p-3 space-y-2 min-h-[220px] max-h-[300px]"
+        className="flex-1 overflow-y-auto p-3 space-y-2 min-h-[300px] max-h-[460px]"
       >
         {chatLog.map((chat, idx) => {
           if (chat.isSystem) {
@@ -101,7 +101,7 @@ export default function ChatRoom({ chatLog, playerName, onSendMessage }: ChatRoo
       </div>
 
       {/* Input controls */}
-      <form onSubmit={handleSend} className="p-2 bg-slate-950/80 border-t border-slate-800 flex gap-1.5">
+      <form onSubmit={handleSend} className="p-2 bg-slate-950/80 border-t border-slate-800 flex items-center gap-1.5">
         <input
           type="text"
           placeholder="Type your message..."

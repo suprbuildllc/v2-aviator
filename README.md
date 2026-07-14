@@ -1,63 +1,357 @@
-# Cryptographic Aviator-Style Crash Game
+# ✈️ V2: Aviator Crash Game
 
-An immersive, multiplayer-simulated, and provably fair Aviator-style crash game. This full-stack application utilizes a custom-built **Express server** integrated with native **WebSockets (`ws`)** to coordinate a high-performance 20fps physics/multiplier game loop, multiplayer bot simulation, dynamic bankrolls, and an interactive cryptographic audit tool.
+A high-fidelity, real-time multiplayer **Aviator-style Crash Game** designed with an industrial, dark-themed casino aesthetic. Built using **React 19**, **Vite**, **TypeScript**, and **Tailwind CSS v4** on the front-end, paired with a resilient, full-stack **Express & ws WebSocket backend** supporting multi-instance synchronization (via Redis) and robust database persistence (via PostgreSQL and Drizzle ORM).
 
-## 🚀 Key Features
-
-- **Full-Stack Real-Time Engine**: Built with a persistent Express server executing a synchronized game loop. Game states (`betting` ➔ `running` ➔ `crashed`) are broadcast in real-time to all clients.
-- **Provably Fair Commitments**: Fully verifiable round outcomes. The server pre-commits the SHA256 hash of a secure random server seed before each round begins. The actual seed is revealed after the round, allowing players to cryptographically verify that the crash point was generated in a non-manipulable, deterministic manner.
-- **Double-Betting Console**: Styled after premium casino consoles, featuring dual betting panels supporting manual and customizable auto-cashout targets. Play with up to $10,000 of play balance!
-- **Interactive Seed Auditor**: A complete in-app verification tool where players can paste the revealed seeds of past rounds to recalculate and mathematically confirm the exact crash multipliers.
-- **Animated HTML5 Canvas Flight**: A fluidly animated jet plane visualizer with dynamic trails, acceleration turbulence, parallax clouds, and soft gravity explosion particles when crashing.
-- **Live Multiplayer Lobby & Chat**: Multi-user chat and leaderboard logs with automated bots chatting, placing strategic bets, and celebrating or lamenting outcomes alongside the player.
-- **Web Audio FX Synthesizer**: Generative, browser-synthesized audio cues (climbing propeller pitches, success bells, and sweeping white-noise explosions) built natively with the Web Audio API (no external asset files required).
+The application features a fully synchronized 20fps physics loop, a high-performance interactive HTML5 canvas renderer, multiplayer bot simulation, dynamic betting modules, browser-synthesized generative audio, and a fully auditable cryptographically **Provably Fair** commitment scheme.
 
 ---
 
-## 🛡️ Provably Fair Cryptographic Logic
+## 🗺️ System Architecture
 
-Every flight's crash point is generated deterministically before the round starts using a combination of a secure **Server Seed** (revealed *after* the crash), a community-driven **Client Seed**, and a sequential **Nonce**:
+```
+                                      +-----------------------------------+
+                                      |         Client Browser            |
+                                      |  (React 19 SPA, Tailwind CSS v4)  |
+                                      +--------+-----------------+--------+
+                                               |                 ^
+                                   HTTP API    |                 |  Real-Time WebSockets
+                                   (JWT Auth)  |                 |  (ws State Protocol)
+                                               v                 |
+                                      +--------+-----------------+--------+
+                                      |          Express Server           |
+                                      |     (Game State Controller)       |
+                                      +---+------------+--------------+---+
+                                          |            |              |
+                                          |            |              |
+                                          v            v              v
+                        +-----------------+--+   +-----+------+   +---+--------------+
+                        |   PostgreSQL DB    |   | Redis Pub/ |   | Generative Sound |
+                        | (Drizzle ORM Schema|   |   Sub Hub  |   | & Canvas Engine  |
+                        |   & persistence)   |   | (Sync state|   |  (Client-side    |
+                        +--------------------+   +------------+   +------------------+
+```
 
-```javascript
-const crypto = require('crypto');
+---
 
-function generateCrashPoint(serverSeed, clientSeed, nonce) {
-  // 1. Create a secure HMAC signature using SHA256
+## 🚀 Core Pillars & Technology Stack
+
+### 1. High-Performance Front-End
+- **React 19 & TypeScript**: Strict typing, functional hooks, and memoized updates.
+- **Tailwind CSS v4**: Ultra-modern, container-query-friendly utility utility classes utilizing native CSS variables.
+- **Interactive HTML5 Canvas**: Smooth, state-driven render loop executing at up to 60fps. Handles flight trails, cloud parallax layers, vector jet drawings, screen shaking, and dynamic explosion particle emitters.
+- **Generative Web Audio Synthesis**: Generates sound directly in the browser using the **Web Audio API**—producing escalating propeller engines, successful cashout bells, and low-pass filtered explosion noise sweeps without loading a single audio asset file.
+
+### 2. Full-Stack Real-Time Server
+- **Express App**: Host APIs for authentication, game history, leaderboards, and user profiles.
+- **Native WebSockets (`ws`)**: Ultra-low latency binary-friendly server connections. Token validation is strictly checked directly inside the raw HTTP `upgrade` sequence to guarantee that unauthenticated connections are rejected before allocating socket memory.
+- **Multi-Instance Redis Sync**: Configured for stateless scaling. State transitions, multiplayer bets, and chat logs are synchronized across multiple instances automatically using a Redis Pub/Sub backplane.
+- **Dual-Mode Graceful Fallback**: The server is self-healing. If either PostgreSQL or Redis is offline, the server automatically degrades into a standalone, local memory-only model with zero impact on gameplay continuity.
+
+---
+
+## 🛡️ Provably Fair Commitment Scheme
+
+To guarantee mathematical honesty, every flight crash multiplier is deterministically pre-calculated before the round even starts.
+
+### The Algorithm
+The crash point is calculated using three variables:
+1. **Server Seed**: A cryptographically secure 32-byte hexadecimal string generated by the server.
+2. **Client Seed**: A community-contributed or customizable text seed (default: `aviator-community-seed`).
+3. **Nonce**: A sequential integer representing the exact sequence number of the round.
+
+```typescript
+import crypto from 'crypto';
+
+function generateCrashPoint(serverSeed: string, clientSeed: string, nonce: number): number {
+  // 1. Generate SHA256 HMAC hash using Server Seed as key and "ClientSeed-Nonce" as value
   const hash = crypto
     .createHmac('sha256', serverSeed)
     .update(`${clientSeed}-${nonce}`)
     .digest('hex');
 
-  // 2. Extract first 8 hex characters (32-bit integer)
+  // 2. Extract first 8 characters (32-bit integer representation)
   const h = parseInt(hash.slice(0, 8), 16);
   const e = Math.pow(2, 32);
 
-  // 3. Apply formula incorporating a 1% House Edge
+  // 3. Apply formula to include a 1% house edge
   const houseEdge = 0.01;
   const result = Math.floor((100 * e - h) / (e - h)) / 100;
 
-  // 4. Multiply by house edge discount and guarantee minimum of 1.00x
+  // 4. Discount result and enforce minimum bound of 1.00x
   const finalVal = result * (1 - houseEdge);
   return Math.max(1.00, parseFloat(finalVal.toFixed(2)));
 }
 ```
 
-Since the server broadcasts the **SHA256 Hash of the Server Seed** prior to takeoff, it is mathematically impossible for the platform to manipulate the flight path or crash timing retroactively.
+### The Trust Flow
+- **Pre-Commitment**: Prior to the betting phase of round `N`, the server publishes the **SHA-256 Hash of the Server Seed** (`serverSeedHash`). This hash acts as a cryptographic seal; the server cannot alter the outcome because the seed has already been committed.
+- **Takeoff**: The game proceeds using the pre-calculated crash multiplier.
+- **The Reveal**: Once the round finishes and crashes, the raw **Server Seed** is revealed and broadcasted to all players.
+- **The Audit**: Players can click any multiplier pill in their history, copy the raw revealed seed parameters, and paste them into the built-in **Verification Calculator** to re-hash and mathematically confirm that the flight crashed at the exact millisecond determined by the cryptographic seal.
 
 ---
 
-## 🛠️ Architecture & Tech Stack
+## 🗄️ Database Schema (Drizzle ORM)
 
-1. **Frontend UI**: Built with React, TypeScript, and styled with **Tailwind CSS**. Designed for both high-density desktops and mobile touch targets.
-2. **Real-Time Backend**: Integrated Express server binding to `0.0.0.0:3000` executing the core gameloop logic and running alongside a `ws` WebSocket connection pool for instantaneous sub-50ms message propagation.
-3. **Typography**: Paired modern **Inter** (sans-serif) for high-scannability telemetry labels with **JetBrains Mono** for crypto seed hashes and climbing multiplier fields.
-4. **Build System**: Configured with automated development, production bundling via `esbuild` for TypeScript server transpilation, and hot-swappable asset optimization.
+Persistent states are stored across three core PostgreSQL tables:
+
+```typescript
+// Users Table
+export const users = pgTable('users', {
+  id: serial('id').primaryKey(),
+  email: text('email').notNull().unique(),
+  username: text('username').notNull(),
+  passwordHash: text('password_hash').notNull(),
+  balance: doublePrecision('balance').default(1000.0).notNull(),
+  isAdmin: boolean('is_admin').default(false).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+// Game Rounds Table
+export const rounds = pgTable('rounds', {
+  id: integer('id').primaryKey(), // Sequential game ID (e.g., 10001)
+  crashPoint: doublePrecision('crash_point').notNull(),
+  serverSeed: text('server_seed').notNull(),
+  serverSeedHash: text('server_seed_hash').notNull(),
+  clientSeed: text('client_seed').notNull(),
+  nonce: integer('nonce').notNull(),
+  startedAt: timestamp('started_at').defaultNow().notNull(),
+  crashedAt: timestamp('crashed_at'),
+});
+
+// Bets Table
+export const bets = pgTable('bets', {
+  id: text('id').primaryKey(), // Custom bet format or UUID
+  roundId: integer('round_id').references(() => rounds.id).notNull(),
+  userId: integer('user_id').references(() => users.id), // Null for virtual bot players
+  playerName: text('player_name').notNull(),
+  amount: doublePrecision('amount').notNull(),
+  autoCashout: doublePrecision('auto_cashout'),
+  cashedOut: boolean('cashed_out').default(false).notNull(),
+  cashoutMultiplier: doublePrecision('cashout_multiplier'),
+  payout: doublePrecision('payout'),
+  isBot: boolean('is_bot').default(false).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+```
 
 ---
 
-## 🎮 Gameplay Guide
+## 🛰️ WebSocket Protocol (WS Payload Specifications)
 
-1. **Place Stakes**: During the 6-second **Betting Phase**, configure your bet sizes on Panel A and/or Panel B. Optionally enable **Auto Cashout** and define your target multiplier (e.g., `2.50x`).
-2. **Watch the Ascent**: As the jet plane takes off, the multiplier scales up exponentially.
-3. **Cash Out**: Click **CASH OUT** on your active panels to secure your profits. If the plane flies away before you cash out, the bet is lost!
-4. **Audit Rounds**: Click any colored multiplier pill in the **Recent History** bar to open its parameter logs. Copy the seed data into the **Provably Fair** tab to audit the cryptographic proof independently.
+The real-time sync is powered by custom JSON event envelopes transmitted over WebSockets.
+
+### 1. Inbound Packets (Client ➔ Server)
+
+#### Place Bet
+```json
+{
+  "type": "place_bet",
+  "payload": {
+    "betId": "bet-A-1784040922100",
+    "amount": 250.00,
+    "autoCashout": 2.50
+  }
+}
+```
+
+#### Cash Out
+```json
+{
+  "type": "cash_out"
+}
+```
+
+#### Submit Chat Message
+```json
+{
+  "type": "chat_message",
+  "payload": {
+    "message": "To the moon! 🚀🚀"
+  }
+}
+```
+
+---
+
+### 2. Outbound Packets (Server ➔ Client)
+
+#### Init Sync (Sent on connection)
+```json
+{
+  "type": "init",
+  "payload": {
+    "status": "betting",
+    "multiplier": 1.00,
+    "timeLeft": 5.4,
+    "currentRoundId": "#10053",
+    "serverSeedHash": "f770eb09577a96dd615124ea8097f4c6cc0ea726112af928e409767c6bef4ec8",
+    "activeBets": [],
+    "roundHistory": [],
+    "balance": 1000.00,
+    "chatLog": []
+  }
+}
+```
+
+#### Betting Phase Start
+```json
+{
+  "type": "betting_start",
+  "payload": {
+    "roundId": "#10053",
+    "timeLeft": 6.0,
+    "serverSeedHash": "ef647fda5...",
+    "nonce": 53,
+    "activeBets": []
+  }
+}
+```
+
+#### Round Flight Takeoff
+```json
+{
+  "type": "round_start",
+  "payload": {
+    "roundId": "#10053",
+    "activeBets": []
+  }
+}
+```
+
+#### Physics Multilier Tick (Emitted every 50ms)
+```json
+{
+  "type": "multiplier_update",
+  "payload": {
+    "multiplier": 2.34
+  }
+}
+```
+
+#### Crash Trigger
+```json
+{
+  "type": "crash",
+  "payload": {
+    "roundId": 10053,
+    "crashPoint": 3.42,
+    "serverSeed": "9b2f6383e...",
+    "serverSeedHash": "ef647fda5...",
+    "clientSeed": "aviator-community-seed",
+    "nonce": 53,
+    "roundHistory": []
+  }
+}
+```
+
+---
+
+## 🎮 Game State Machine Diagram
+
+```
+       +--------------------------------------------+
+       |                                            |
+       |               BETTING PHASE                | <=============================+
+       |   - Time Remaining ticks down (6.0s)       |                               |
+       |   - Users place active double bets         |                               |
+       |   - Bots simulate strategic bankroll joins |                               |
+       |                                            |                               |
+       +--------------------+-----------------------+                               |
+                            |                                                       |
+                            | Timer reaches 0.0s                                    |
+                            v                                                       |
+       +--------------------+-----------------------+                               |
+       |                                            |                               |
+       |                RUNNING PHASE               |                               |
+       |   - Physics loop launches flight plane     |                               |
+       |   - Multiplier scales exponentially        |                               |
+       |   - Active users click "CASH OUT"          |                               |
+       |   - Auto-cashouts validate instantly       |                               |
+       |                                            |                               |
+       +--------------------+-----------------------+                               |
+                            |                                                       |
+                            | Multiplier reaches pre-determined crash point         |
+                            v                                                       |
+       +--------------------+-----------------------+                               |
+       |                                            |                               |
+       |                CRASHED PHASE               |                               |
+       |   - Propeller explosion and screen shakes  |                               |
+       |   - Revealed server seed is broadcasted    |                               |
+       |   - Database updates user balances         |                               |
+       |   - Game results persist permanently       |                               |
+       |                                            |                               |
+       +--------------------+-----------------------+                               |
+                            |                                                       |
+                            | 5.0s Cooldown expires                                 |
+                            +-------------------------------------------------------+
+```
+
+---
+
+## 🛠️ Installation & Local Development
+
+### 1. Prerequisites
+- **Node.js** v18+ (LTS recommended)
+- **PostgreSQL** instance (Optional - fallbacks to memory database automatically)
+- **Redis Server** instance (Optional - fallbacks to standalone memory sync automatically)
+
+### 2. Configure Environment Variables
+Copy the `.env.example` file and configure your credentials:
+```bash
+cp .env.example .env
+```
+Ensure your configuration fields match your target services:
+```env
+# Server Details
+PORT=3000
+
+# JWT Auth Secret
+JWT_SECRET=your-secure-jwt-auth-token-secret
+
+# PostgreSQL Database (Optional)
+DATABASE_URL=postgres://username:password@localhost:5432/aviator_db
+
+# Redis Synchronization (Optional)
+REDIS_HOST=localhost
+REDIS_PORT=6379
+```
+
+### 3. Install Dependencies
+```bash
+npm install
+```
+
+### 4. Run Development Server
+Executes the typescript Express server and Vite static asset compilation side-by-side using unified, hot-reloading watchers:
+```bash
+npm run dev
+```
+
+### 5. Production Compilations
+Builds and bundles the complete application for optimized production serving. Transpiles both server modules to standard CommonJS and front-end bundle optimizations into static deployment-ready packages:
+```bash
+npm run build
+```
+
+### 6. Standalone Start Command
+Launches the fully bundled application using optimized build artifacts:
+```bash
+npm run start
+```
+
+---
+
+## 🎨 Creative Aesthetics & Accessibility Guide
+
+### Typography Configuration
+The UI is strictly styled using carefully selected fonts imported via Google Fonts:
+- **Display Typography (`Space Grotesk`)**: Paired for high-impact numbers, climbing multiplier ratios, crash alert banners, and telemetry telemetry headers to evoke an industrial-grade high-tech feel.
+- **Mono-spaced Typography (`JetBrains Mono`)**: Applied to complex cryptographic fields, seeds, raw hash strings, dates, ledger values, and table databases to maximize legible digit layouts.
+- **Clean Sans-Serif (`Inter`)**: Utilized across all inputs, sliders, descriptions, chats, logs, and notification nodes.
+
+### Generative Audio Nodes
+All audio responses are dynamically synthesized client-side on-demand utilizing frequency modulation nodes inside the **AudioContext**:
+- **Engine Propeller climb**: Generates a rich, pulsating sawtooth wave oscillator that matches the flight trajectory by scaling both the pitch (frequency) and modulation speed from `100Hz` upward to match the climbing multiplier.
+- **Cashout Success**: Plays a beautiful, warm, two-tone frequency chime pairing a frequency node envelope (`880Hz` ➔ `1320Hz`) with soft decay filters.
+- **Crash Explode**: Triggers a powerful noise-buffer envelope passing high-frequency white noise through a collapsing low-pass filter with customized resonance decay envelopes to simulate a realistic explosion rumble.
