@@ -1,0 +1,6 @@
+{
+  "name": "V2: Aviator Crash Game",
+  "description": "A multiplayer Aviator-style crash game with a real-time server loop, WebSocket state synchronization, a provably-fair verification panel, and a dynamic betting engine.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
