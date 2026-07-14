@@ -130,6 +130,7 @@ export default function BetControl({
     const hasActiveBet = activeServerBet && !isCashedOut;
     // Payout projection
     const projectedPayout = stake * multiplier;
+    const potentialProfit = Math.max(0, projectedPayout - stake);
 
     return (
       <div className={`relative flex flex-col rounded-xl border p-4 transition-all duration-300 ${
@@ -211,6 +212,22 @@ export default function BetControl({
               </button>
             );
           })}
+        </div>
+
+        {/* Real-time Potential Profit Display */}
+        <div className="mb-3 flex items-center justify-between rounded-lg bg-slate-950/50 border border-slate-800/40 p-2.5">
+          <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+            <ArrowUpRight size={13} className="text-emerald-400 animate-pulse" />
+            Potential Profit
+          </div>
+          <div className="text-right">
+            <span className="text-xs font-black font-mono text-emerald-400">
+              +${potentialProfit.toFixed(2)}
+            </span>
+            <span className="text-[9px] text-slate-500 font-bold ml-1.5 font-mono">
+              ({multiplier.toFixed(2)}x)
+            </span>
+          </div>
         </div>
 
         {/* Auto Cashout Fields */}

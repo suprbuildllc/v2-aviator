@@ -100,7 +100,9 @@ export default function BetBoard({ activeBets, playerId, roundHistory }: BetBoar
                   <div
                     key={bet.id}
                     className={`flex items-center justify-between rounded-lg px-3 py-2 text-xs transition border ${
-                      isMe 
+                      isMe && bet.cashedOut
+                        ? 'cashout-highlight'
+                        : isMe 
                         ? 'bg-red-500/10 border-red-500/20 shadow-sm shadow-red-500/5' 
                         : bet.cashedOut
                         ? 'bg-emerald-500/5 border-emerald-500/10'
