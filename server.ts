@@ -83,6 +83,23 @@ async function initDb() {
     
     console.log('[System] PostgreSQL tables initialized successfully.');
     useDb = true;
+
+    // Fetch the latest round to resume from the correct ID
+    try {
+      const latestRounds = await db.select({ id: rounds.id, nonce: rounds.nonce })
+        .from(rounds)
+        .orderBy(desc(rounds.id))
+        .limit(1);
+      if (latestRounds.length > 0) {
+        currentRoundId = latestRounds[0].id + 1;
+        nonce = latestRounds[0].nonce + 1;
+        console.log(`[System] Resuming from database roundId: ${currentRoundId}, nonce: ${nonce}`);
+      } else {
+        console.log(`[System] No existing rounds in database. Starting from roundId: ${currentRoundId}, nonce: ${nonce}`);
+      }
+    } catch (err: any) {
+      console.warn(`[System] Failed to fetch latest round from database, starting from ${currentRoundId}:`, err.message);
+    }
   } catch (err: any) {
     console.warn(`[System] PostgreSQL initialization failed. Falling back to memory-only database: ${err.message}`);
     useDb = false;
@@ -858,7 +875,12 @@ const wss = new WebSocketServer({ noServer: true });
 // Reject the connection directly if token is invalid or missing
 // Satisfies Goal #1: Eliminate the security auth hole completely
 httpServer.on('upgrade', (request, socket, head) => {
-  const { query } = parse(request.url || '', true);
+  const { pathname, query } = parse(request.url || '', true);
+
+  if (pathname !== '/ws') {
+    return;
+  }
+
   const token = query.token as string;
 
   if (!token) {

@@ -181,7 +181,7 @@ export default function App() {
 
       // Pass JWT as query parameter for secure server-side auth
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const wsUrl = `${protocol}//${window.location.host}?token=${encodeURIComponent(token)}`;
+      const wsUrl = `${protocol}//${window.location.host}/ws?token=${encodeURIComponent(token)}`;
       console.log(`[WS] Connecting to authenticated WebSocket...`);
 
       socket = new WebSocket(wsUrl);
