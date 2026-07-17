@@ -302,7 +302,7 @@ export default function App() {
       };
 
       socket.onerror = (err) => {
-        console.error('[WS Client Error]:', err);
+        console.warn('[WS Client Connection State]:', err);
         setWsError('Server connection error. Reconnecting...');
       };
 

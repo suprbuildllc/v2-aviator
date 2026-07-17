@@ -102,7 +102,11 @@ async function initDb() {
       console.warn(`[System] Failed to fetch latest round from database, starting from ${currentRoundId}:`, err.message);
     }
   } catch (err: any) {
-    console.warn(`[System] PostgreSQL initialization failed. Falling back to memory-only database: ${err.message}`);
+    let reason = err.message || 'unknown error';
+    if (reason === 'Failed query:') {
+      reason = 'Failed query: database connection could not be established (offline)';
+    }
+    console.warn(`[System] PostgreSQL initialization failed. Falling back to memory-only database: ${reason}`);
     useDb = false;
   }
 }
@@ -330,25 +334,43 @@ const REDIS_PORT = parseInt(process.env.REDIS_PORT || '6379', 10);
 function initRedis() {
   try {
     console.log(`[Redis] Attempting to connect to Redis at ${REDIS_HOST}:${REDIS_PORT}...`);
+    
+    let warningLogged = false;
+    const commonRetryStrategy = (times: number) => {
+      if (times > 3) {
+        if (!warningLogged) {
+          console.warn('[Redis] Connection failed. Running in standalone, memory-only sync.');
+          warningLogged = true;
+        }
+        useRedis = false;
+        redisClient?.disconnect();
+        redisPub?.disconnect();
+        redisSub?.disconnect();
+        return null; // Stop retrying
+      }
+      return Math.min(times * 100, 1000);
+    };
+
     redisClient = new Redis({
       host: REDIS_HOST,
       port: REDIS_PORT,
       maxRetriesPerRequest: 1,
-      retryStrategy: (times) => {
-        if (times > 3) {
-          console.warn('[Redis] Connection failed. Running in standalone, memory-only sync.');
-          useRedis = false;
-          redisClient?.disconnect();
-          redisPub?.disconnect();
-          redisSub?.disconnect();
-          return null; // Stop retrying
-        }
-        return Math.min(times * 100, 1000);
-      }
+      retryStrategy: commonRetryStrategy
     });
 
-    redisPub = new Redis({ host: REDIS_HOST, port: REDIS_PORT, maxRetriesPerRequest: 1 });
-    redisSub = new Redis({ host: REDIS_HOST, port: REDIS_PORT, maxRetriesPerRequest: 1 });
+    redisPub = new Redis({
+      host: REDIS_HOST,
+      port: REDIS_PORT,
+      maxRetriesPerRequest: 1,
+      retryStrategy: commonRetryStrategy
+    });
+
+    redisSub = new Redis({
+      host: REDIS_HOST,
+      port: REDIS_PORT,
+      maxRetriesPerRequest: 1,
+      retryStrategy: commonRetryStrategy
+    });
 
     redisClient.on('connect', () => {
       console.log('[Redis] Connected successfully. Multi-instance mode enabled!');
@@ -357,7 +379,15 @@ function initRedis() {
     });
 
     redisClient.on('error', (err) => {
-      console.warn(`[Redis] Connection issue: ${err.message}`);
+      console.warn(`[Redis Client] Connection issue: ${err.message}`);
+    });
+
+    redisPub.on('error', (err) => {
+      console.warn(`[Redis Pub] Connection issue: ${err.message}`);
+    });
+
+    redisSub.on('error', (err) => {
+      console.warn(`[Redis Sub] Connection issue: ${err.message}`);
     });
   } catch (err: any) {
     console.warn(`[Redis] Initialization exception: ${err.message}`);

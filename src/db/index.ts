@@ -10,7 +10,7 @@ export const createPool = () => {
     user: process.env.SQL_USER || 'postgres',
     password: process.env.SQL_PASSWORD || 'postgres',
     database: process.env.SQL_DB_NAME || 'aviator',
-    connectionTimeoutMillis: 15000,
+    connectionTimeoutMillis: 2000,
   });
 };
 
