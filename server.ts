@@ -111,6 +111,54 @@ async function initDb() {
   }
 }
 
+// Seed the demo user demo@demo.com with password demo1234
+async function seedDemoUser() {
+  const demoEmail = 'demo@demo.com';
+  const demoUsername = 'demo';
+  const demoPassword = 'demo1234';
+  const hashed = hashPassword(demoPassword);
+
+  // 1. Seed in-memory database fallback
+  const existingLocal = localUsersByEmail.get(demoEmail);
+  if (!existingLocal) {
+    const id = localUserCount++;
+    const newUser = {
+      id,
+      email: demoEmail,
+      username: demoUsername,
+      passwordHash: hashed,
+      balance: 1000.0,
+      isAdmin: false,
+      createdAt: new Date()
+    };
+    localUsersByEmail.set(demoEmail, newUser);
+    localUsersById.set(id, newUser);
+    localBalances.set(id, 1000.0);
+    console.log('[Seed] Seeded demo user in local in-memory database successfully.');
+  }
+
+  // 2. Seed PostgreSQL database if enabled
+  if (useDb) {
+    try {
+      const existingInDb = await db.select().from(users).where(eq(users.email, demoEmail)).limit(1);
+      if (existingInDb.length === 0) {
+        await db.insert(users).values({
+          email: demoEmail,
+          username: demoUsername,
+          passwordHash: hashed,
+          balance: 1000.0,
+          isAdmin: false
+        });
+        console.log('[Seed] Seeded demo user in PostgreSQL database successfully.');
+      } else {
+        console.log('[Seed] Demo user already exists in PostgreSQL database.');
+      }
+    } catch (err: any) {
+      console.warn('[Seed] Failed to seed demo user in PostgreSQL database:', err.message);
+    }
+  }
+}
+
 // --- DB Helper Functions ---
 async function dbGetOrCreateUser(email: string, username: string, passwordHash: string) {
   if (useDb) {
@@ -1261,6 +1309,7 @@ async function main() {
   }
 
   await initDb();
+  await seedDemoUser();
   initRedis();
   await setupVite();
 
