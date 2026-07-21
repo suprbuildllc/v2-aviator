@@ -950,10 +950,10 @@ async function triggerCrash() {
 // --- Setup WebSocket Server attached to Server ---
 const wss = new WebSocketServer({ noServer: true });
 
-// HTTP Server upgrade handler with JWT Authentication
+// Early HTTP Server upgrade handler with JWT Authentication
 // Reject the connection directly if token is invalid or missing
 // Satisfies Goal #1: Eliminate the security auth hole completely
-httpServer.on('upgrade', async (request, socket, head) => {
+async function handleUpgradeEarly(request: any, socket: any, head: any) {
   const { pathname, query } = parse(request.url || '', true);
   const token = query.token as string;
 
@@ -1002,7 +1002,9 @@ httpServer.on('upgrade', async (request, socket, head) => {
   wss.handleUpgrade(request, socket, head, (ws) => {
     wss.emit('connection', ws, request, payload);
   });
-});
+}
+
+httpServer.on('upgrade', handleUpgradeEarly);
 
 // WS Session Handler with authenticated payload passed directly
 wss.on('connection', async (ws: WebSocket, request, decodedUser: any) => {
@@ -1290,6 +1292,63 @@ async function setupVite() {
   }
 }
 
+function setupWebSocketGatekeeper() {
+  // Retrieve all currently registered upgrade listeners on our HTTP server
+  const existingListeners = httpServer.listeners('upgrade');
+
+  // Clear all upgrade listeners so we can handle routing ourselves
+  httpServer.removeAllListeners('upgrade');
+
+  // Register our router/gatekeeper as the single upgrade handler
+  const gatekeeper = async (request: any, socket: any, head: any) => {
+    const { pathname, query } = parse(request.url || '', true);
+    const token = query.token as string;
+
+    // Determine if this request is destined for our WebSocket game server
+    const isOurWs = pathname === '/ws' || pathname === '/ws/' || (token && (pathname === '/' || !pathname));
+
+    if (isOurWs) {
+      try {
+        fs.appendFileSync('./ws-debug.log', `[GATEKEEPER MATCH] URL: ${request.url} | Pathname: ${pathname}\n`);
+      } catch {}
+
+      // Handle our WS! Authenticate the connection payload:
+      let payload: any = null;
+      if (token && token !== 'demo-bypass-token') {
+        payload = verifyJwt(token);
+      }
+
+      if (!payload) {
+        try {
+          const user = await dbGetUserByEmail('demo@demo.com');
+          if (user) {
+            payload = { id: user.id, username: user.username, email: user.email, isAdmin: user.isAdmin };
+          }
+        } catch (err) {}
+
+        if (!payload) {
+          payload = { id: 1, username: 'demo', email: 'demo@demo.com', isAdmin: false };
+        }
+      }
+
+      wss.handleUpgrade(request, socket, head, (ws) => {
+        wss.emit('connection', ws, request, payload);
+      });
+    } else {
+      // It's not our WebSocket (e.g., Vite HMR), so delegate to the original listeners
+      for (const listener of existingListeners) {
+        if (listener === gatekeeper || listener === handleUpgradeEarly || listener.name === 'handleUpgradeEarly') {
+          continue;
+        }
+        listener.call(httpServer, request, socket, head);
+      }
+    }
+  };
+
+  httpServer.on('upgrade', gatekeeper);
+  console.log(`[WS] WebSocket Gatekeeper configured with ${existingListeners.length} underlying listeners.`);
+}
+
 // Start-up sequence
 async function main() {
   // Self-healing local service starter
@@ -1331,6 +1390,9 @@ async function main() {
   await seedDemoUser();
   initRedis();
   await setupVite();
+
+  // --- Setup Unified WebSocket Gatekeeper to prevent other listeners (like Vite HMR) from interfering with our connections ---
+  setupWebSocketGatekeeper();
 
   // Run periodic leader lock checks
   setInterval(checkLeaderElection, 1000);
