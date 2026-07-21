@@ -10,6 +10,7 @@ export interface Bet {
   cashoutMultiplier?: number;
   payout?: number;
   isSimulated?: boolean;
+  timestamp?: number;
 }
 
 export interface RoundHistoryEntry {
