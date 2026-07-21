@@ -41,7 +41,7 @@ export default function ChatRoom({ chatLog, playerName, onSendMessage }: ChatRoo
     <div className="flex flex-col h-full rounded-xl border border-slate-800 bg-slate-900/60 overflow-hidden">
       {/* Header */}
       <div className="flex items-center gap-2 border-b border-slate-800 bg-slate-950/80 px-4 py-3">
-        <MessageSquare size={16} className="text-red-500" />
+        <MessageSquare size={16} className="text-amber-500" />
         <span className="text-xs font-bold uppercase tracking-wider text-slate-200">Community Chat</span>
         <span className="ml-auto rounded-full bg-emerald-500/10 px-2 py-0.5 text-[9px] font-bold text-emerald-400 border border-emerald-500/20">
           Online
@@ -60,7 +60,7 @@ export default function ChatRoom({ chatLog, playerName, onSendMessage }: ChatRoo
                 key={idx}
                 className="rounded-lg bg-slate-950/40 p-2.5 border border-slate-800/50 text-[10px] text-slate-400 leading-normal flex gap-1.5"
               >
-                <ShieldAlert size={12} className="text-red-500/80 shrink-0 mt-0.5" />
+                <ShieldAlert size={12} className="text-amber-500/80 shrink-0 mt-0.5" />
                 <div>
                   <span className="font-semibold text-slate-300">System Announcement: </span>
                   {chat.message}
@@ -80,7 +80,7 @@ export default function ChatRoom({ chatLog, playerName, onSendMessage }: ChatRoo
             >
               {/* Sender & Timestamp */}
               <div className="flex items-center gap-1.5 text-[10px] text-slate-500 mb-0.5 px-1">
-                <span className={`font-semibold ${isMe ? 'text-red-400/85' : 'text-slate-400'}`}>
+                <span className={`font-semibold ${isMe ? 'text-amber-400/85' : 'text-slate-400'}`}>
                   {chat.sender}
                 </span>
                 <span>•</span>
@@ -90,7 +90,7 @@ export default function ChatRoom({ chatLog, playerName, onSendMessage }: ChatRoo
               {/* Speech Bubble */}
               <div className={`rounded-xl px-3 py-2 leading-relaxed ${
                 isMe 
-                  ? 'bg-red-500 text-slate-950 font-medium rounded-tr-none shadow-sm shadow-red-500/10' 
+                  ? 'bg-amber-500 text-slate-950 font-medium rounded-tr-none shadow-sm shadow-amber-500/10' 
                   : 'bg-slate-950/50 text-slate-300 rounded-tl-none border border-slate-800/60'
               }`}>
                 {chat.message}
@@ -113,7 +113,7 @@ export default function ChatRoom({ chatLog, playerName, onSendMessage }: ChatRoo
         <button
           type="submit"
           disabled={!inputText.trim()}
-          className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-500 text-slate-950 hover:bg-red-400 transition active:scale-95 disabled:opacity-30 disabled:hover:bg-red-500"
+          className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500 text-slate-950 hover:bg-amber-400 transition active:scale-95 disabled:opacity-30 disabled:hover:bg-amber-500"
         >
           <Send size={12} />
         </button>

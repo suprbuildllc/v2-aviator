@@ -24,9 +24,9 @@ export default function RecentHistory({ history }: RecentHistoryProps) {
     } else if (val < 2.0) {
       return 'bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500/25';
     } else if (val < 10.0) {
-      return 'bg-red-500/10 text-red-400 border border-red-500/25 hover:bg-red-500/30 font-bold';
+      return 'bg-amber-500/10 text-amber-400 border border-amber-500/25 hover:bg-amber-500/30 font-bold';
     } else {
-      return 'bg-amber-500/10 text-amber-400 border border-amber-500/30 hover:bg-amber-500/25 font-black shadow-[0_0_10px_rgba(245,158,11,0.1)]';
+      return 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/30 hover:bg-yellow-500/25 font-black shadow-[0_0_10px_rgba(234,179,8,0.15)]';
     }
   };
 
@@ -80,7 +80,7 @@ export default function RecentHistory({ history }: RecentHistoryProps) {
             <div className="space-y-2 text-xs">
               <div className="flex items-center justify-between rounded bg-slate-950 p-2.5 border border-slate-800">
                 <span className="text-slate-500">Crash Multiplier:</span>
-                <span className="font-extrabold text-red-400 font-mono text-sm">
+                <span className="font-extrabold text-amber-400 font-mono text-sm">
                   {selectedRound.crashPoint.toFixed(2)}x
                 </span>
               </div>

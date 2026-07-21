@@ -51,7 +51,7 @@ export default function GameCanvas({ status, multiplier, timeLeft }: GameCanvasP
       const px = planePos.current.x;
       const py = planePos.current.y;
       const explosionParticles: Particle[] = [];
-      const colors = ['#ef4444', '#f97316', '#eab308', '#ffffff', '#78716c'];
+      const colors = ['#fbbf24', '#f97316', '#eab308', '#ffffff', '#78716c'];
 
       for (let i = 0; i < 40; i++) {
         const angle = Math.random() * Math.PI * 2;
@@ -174,13 +174,13 @@ export default function GameCanvas({ status, multiplier, timeLeft }: GameCanvasP
 
         // Styling the trail
         const gradient = ctx.createLinearGradient(80, 380, px, py);
-        gradient.addColorStop(0, 'rgba(239, 68, 68, 0.1)'); // red transparent
+        gradient.addColorStop(0, 'rgba(251, 191, 36, 0.1)'); // amber transparent
         gradient.addColorStop(0.5, 'rgba(234, 179, 8, 0.4)'); // yellow
-        gradient.addColorStop(1, '#ef4444'); // hot red
+        gradient.addColorStop(1, '#ffcc00'); // hot gold yellow
         
         ctx.strokeStyle = gradient;
         ctx.lineWidth = 4;
-        ctx.shadowColor = 'rgba(239, 68, 68, 0.5)';
+        ctx.shadowColor = 'rgba(251, 191, 36, 0.5)';
         ctx.shadowBlur = 10;
         ctx.stroke();
         ctx.shadowBlur = 0; // reset shadow
@@ -193,8 +193,8 @@ export default function GameCanvas({ status, multiplier, timeLeft }: GameCanvasP
         ctx.closePath();
         
         const fillGradient = ctx.createLinearGradient(80, 200, 80, 380);
-        fillGradient.addColorStop(0, 'rgba(239, 68, 68, 0.15)');
-        fillGradient.addColorStop(1, 'rgba(239, 68, 68, 0.0)');
+        fillGradient.addColorStop(0, 'rgba(251, 191, 36, 0.15)');
+        fillGradient.addColorStop(1, 'rgba(251, 191, 36, 0.0)');
         ctx.fillStyle = fillGradient;
         ctx.fill();
       }
@@ -224,8 +224,8 @@ export default function GameCanvas({ status, multiplier, timeLeft }: GameCanvasP
 
         // Draw Beautiful Glowing Jet Red Wing Shape (Aviator iconic plane look)
         // Red main fuselage
-        ctx.fillStyle = '#ef4444';
-        ctx.strokeStyle = '#991b1b';
+        ctx.fillStyle = '#ffcc00';
+        ctx.strokeStyle = '#78350f';
         ctx.lineWidth = 1.5;
 
         // Fuselage path
@@ -252,7 +252,7 @@ export default function GameCanvas({ status, multiplier, timeLeft }: GameCanvasP
         ctx.fill();
 
         // Wing details
-        ctx.fillStyle = '#dc2626';
+        ctx.fillStyle = '#eab308';
         ctx.beginPath();
         ctx.moveTo(-5, 0);
         ctx.lineTo(-8, 18); // lower wing
@@ -358,7 +358,7 @@ export default function GameCanvas({ status, multiplier, timeLeft }: GameCanvasP
         // Active sweep track
         const startAngle = -Math.PI / 2;
         const endAngle = startAngle + (timeLeft / 6.0) * (Math.PI * 2);
-        ctx.strokeStyle = '#ef4444'; // Red spinner
+        ctx.strokeStyle = '#ffcc00'; // Gold spinner
         ctx.lineWidth = 8;
         ctx.lineCap = 'round';
         ctx.beginPath();
@@ -386,8 +386,8 @@ export default function GameCanvas({ status, multiplier, timeLeft }: GameCanvasP
         ctx.textBaseline = 'middle';
 
         ctx.font = '800 52px "Inter", sans-serif';
-        ctx.fillStyle = '#ef4444';
-        ctx.shadowColor = 'rgba(239, 68, 68, 0.4)';
+        ctx.fillStyle = '#ffcc00';
+        ctx.shadowColor = 'rgba(251, 191, 36, 0.4)';
         ctx.shadowBlur = 20;
         ctx.fillText('FLEW AWAY!', canvasWidth / 2, 120);
         ctx.shadowBlur = 0;
@@ -412,14 +412,14 @@ export default function GameCanvas({ status, multiplier, timeLeft }: GameCanvasP
   return (
     <div className="relative w-full overflow-hidden rounded-xl border border-slate-800 bg-slate-950 shadow-2xl">
       <div className="absolute top-4 left-4 z-10 flex items-center gap-2 rounded-full bg-slate-900/80 px-3 py-1.5 border border-slate-800 text-xs text-slate-400 backdrop-blur-sm">
-        <span className={`h-2.5 w-2.5 rounded-full ${status === 'running' ? 'bg-red-500 animate-pulse' : status === 'betting' ? 'bg-amber-500 animate-ping' : 'bg-red-600'}`}></span>
+        <span className={`h-2.5 w-2.5 rounded-full ${status === 'running' ? 'bg-amber-500 animate-pulse' : status === 'betting' ? 'bg-amber-400 animate-ping' : 'bg-amber-600'}`}></span>
         <span className="font-semibold uppercase tracking-wider font-sans">
           {status === 'running' ? 'Active Flight' : status === 'betting' ? 'Betting Open' : 'Crashed'}
         </span>
       </div>
 
       {status === 'running' && (
-        <div className="absolute top-4 right-4 z-10 flex items-center gap-1.5 rounded-full bg-red-500/10 px-3 py-1.5 border border-red-500/20 text-xs font-semibold text-red-400 backdrop-blur-sm animate-pulse font-mono">
+        <div className="absolute top-4 right-4 z-10 flex items-center gap-1.5 rounded-full bg-amber-500/10 px-3 py-1.5 border border-amber-500/20 text-xs font-semibold text-amber-400 backdrop-blur-sm animate-pulse font-mono">
           🚀 CLIMBING SPEED: {Math.max(100, Math.floor(multiplier * 180))} km/h
         </div>
       )}

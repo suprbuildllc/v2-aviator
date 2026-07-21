@@ -132,13 +132,13 @@ export default function ProvablyFairUI({ currentNonce, communityClientSeed, last
       {lastRound ? (
         <div className="mb-5 space-y-2 border-b border-slate-800/60 pb-5">
           <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1">
-            <Code size={12} className="text-red-500" /> Last Flight Details ({lastRound.roundId})
+            <Code size={12} className="text-amber-500" /> Last Flight Details ({lastRound.roundId})
           </h4>
 
           {/* Crash Point */}
           <div className="flex items-center justify-between rounded bg-slate-950/30 px-3 py-1.5 border border-slate-800/40 text-xs">
             <span className="text-slate-500">Real Crash Multiplier:</span>
-            <span className="font-extrabold text-red-400 font-mono">{lastRound.crashPoint.toFixed(2)}x</span>
+            <span className="font-extrabold text-amber-400 font-mono">{lastRound.crashPoint.toFixed(2)}x</span>
           </div>
 
           {/* Server Seed */}
@@ -272,7 +272,7 @@ export default function ProvablyFairUI({ currentNonce, communityClientSeed, last
         )}
 
         {errorMessage && (
-          <div className="mt-2 text-center text-xs text-red-500 bg-red-500/10 border border-red-500/20 p-2 rounded">
+          <div className="mt-2 text-center text-xs text-amber-500 bg-amber-500/10 border border-amber-500/20 p-2 rounded">
             {errorMessage}
           </div>
         )}

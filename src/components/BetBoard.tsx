@@ -39,7 +39,7 @@ export default function BetBoard({ activeBets, playerId, roundHistory }: BetBoar
           <Users size={14} />
           Live Lobby
           {totalBetsCount > 0 && (
-            <span className="rounded-full bg-red-500/10 border border-red-500/25 px-1.5 py-0.5 text-[9px] font-black text-red-400 font-mono">
+            <span className="rounded-full bg-amber-500/10 border border-amber-500/25 px-1.5 py-0.5 text-[9px] font-black text-amber-400 font-mono">
               {totalBetsCount}
             </span>
           )}
@@ -103,7 +103,7 @@ export default function BetBoard({ activeBets, playerId, roundHistory }: BetBoar
                       isMe && bet.cashedOut
                         ? 'cashout-highlight'
                         : isMe 
-                        ? 'bg-red-500/10 border-red-500/20 shadow-sm shadow-red-500/5' 
+                        ? 'bg-amber-500/10 border-amber-500/20 shadow-sm shadow-amber-500/5' 
                         : bet.cashedOut
                         ? 'bg-emerald-500/5 border-emerald-500/10'
                         : 'bg-slate-950/30 border-slate-800/40'
@@ -113,7 +113,7 @@ export default function BetBoard({ activeBets, playerId, roundHistory }: BetBoar
                     <div className="flex items-center gap-2">
                       <div className={`h-6 w-6 rounded-md flex items-center justify-center font-bold font-sans text-[10px] ${
                         isMe 
-                          ? 'bg-red-500 text-slate-950' 
+                          ? 'bg-amber-500 text-slate-950' 
                           : bet.isSimulated 
                           ? 'bg-slate-800 text-slate-300' 
                           : 'bg-indigo-500 text-slate-950'
@@ -123,7 +123,7 @@ export default function BetBoard({ activeBets, playerId, roundHistory }: BetBoar
                       <div>
                         <div className="flex items-center gap-1 font-semibold text-slate-300">
                           {bet.playerName}
-                          {isMe && <span className="rounded bg-red-500/20 px-1 py-0.2 text-[8px] font-black text-red-400">YOU</span>}
+                          {isMe && <span className="rounded bg-amber-500/20 px-1 py-0.2 text-[8px] font-black text-amber-400">YOU</span>}
                           {bet.isSimulated && <span className="rounded bg-slate-800 px-1 py-0.2 text-[8px] font-medium text-slate-400">BOT</span>}
                         </div>
                         {bet.autoCashout && (
@@ -208,7 +208,7 @@ export default function BetBoard({ activeBets, playerId, roundHistory }: BetBoar
                         </>
                       ) : (
                         <>
-                          <span className="rounded bg-red-500/10 px-1.5 py-0.5 text-[10px] font-black text-red-400 border border-red-500/20 font-mono">
+                          <span className="rounded bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-black text-amber-400 border border-amber-500/20 font-mono">
                             Lost
                           </span>
                           <div className="text-[9px] font-semibold font-mono text-slate-500 mt-1">

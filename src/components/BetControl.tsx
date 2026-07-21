@@ -238,7 +238,7 @@ export default function BetControl({
               checked={isAuto}
               onChange={(e) => setAuto(e.target.checked)}
               disabled={isPlaced && status !== 'crashed'}
-              className="rounded border-slate-700 bg-slate-900 text-red-500 focus:ring-red-500/20"
+              className="rounded border-slate-700 bg-slate-900 text-amber-500 focus:ring-amber-500/20"
             />
             Auto Cashout
           </label>
@@ -289,7 +289,7 @@ export default function BetControl({
             </div>
           )
         ) : (
-          <div className="flex h-12 w-full items-center justify-center rounded-lg bg-red-500/10 border border-red-500/20 text-xs font-semibold text-red-500 uppercase tracking-wider">
+          <div className="flex h-12 w-full items-center justify-center rounded-lg bg-amber-500/10 border border-amber-500/20 text-xs font-semibold text-amber-500 uppercase tracking-wider">
             Round Crashed
           </div>
         )}

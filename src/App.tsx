@@ -498,7 +498,7 @@ export default function App() {
           {/* Form */}
           <form onSubmit={handleAuthSubmit} className="space-y-4">
             {authError && (
-              <div className="p-3 text-xs bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 font-medium">
+              <div className="p-3 text-xs bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-400 font-medium">
                 {authError}
               </div>
             )}
@@ -513,7 +513,7 @@ export default function App() {
                   value={emailInput}
                   onChange={(e) => setEmailInput(e.target.value)}
                   placeholder="name@example.com"
-                  className="w-full bg-slate-950/80 border border-slate-800 focus:border-red-500/50 rounded-xl py-2.5 pl-10 pr-4 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-red-500/20 text-slate-200 placeholder:text-slate-600 transition-all"
+                  className="w-full bg-slate-950/80 border border-slate-800 focus:border-amber-500/50 rounded-xl py-2.5 pl-10 pr-4 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-amber-500/20 text-slate-200 placeholder:text-slate-600 transition-all"
                 />
               </div>
             </div>
@@ -529,7 +529,7 @@ export default function App() {
                     value={usernameInput}
                     onChange={(e) => setUsernameInput(e.target.value)}
                     placeholder="Pilot_Streak_77"
-                    className="w-full bg-slate-950/80 border border-slate-800 focus:border-red-500/50 rounded-xl py-2.5 pl-10 pr-4 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-red-500/20 text-slate-200 placeholder:text-slate-600 transition-all"
+                    className="w-full bg-slate-950/80 border border-slate-800 focus:border-amber-500/50 rounded-xl py-2.5 pl-10 pr-4 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-amber-500/20 text-slate-200 placeholder:text-slate-600 transition-all"
                   />
                 </div>
               </div>
@@ -545,7 +545,7 @@ export default function App() {
                   value={passwordInput}
                   onChange={(e) => setPasswordInput(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full bg-slate-950/80 border border-slate-800 focus:border-red-500/50 rounded-xl py-2.5 pl-10 pr-4 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-red-500/20 text-slate-200 placeholder:text-slate-600 transition-all"
+                  className="w-full bg-slate-950/80 border border-slate-800 focus:border-amber-500/50 rounded-xl py-2.5 pl-10 pr-4 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-amber-500/20 text-slate-200 placeholder:text-slate-600 transition-all"
                 />
               </div>
             </div>
@@ -553,7 +553,7 @@ export default function App() {
             <button
               type="submit"
               disabled={authLoading}
-              className="w-full bg-red-600 hover:bg-red-500 font-bold text-xs uppercase tracking-wider py-3 rounded-xl shadow-lg shadow-red-600/10 hover:shadow-red-500/20 transition-all duration-200 active:scale-[0.98] mt-2 flex items-center justify-center gap-2 text-slate-950"
+              className="w-full bg-amber-500 hover:bg-amber-400 font-bold text-xs uppercase tracking-wider py-3 rounded-xl shadow-lg shadow-amber-500/10 hover:shadow-amber-400/20 transition-all duration-200 active:scale-[0.98] mt-2 flex items-center justify-center gap-2 text-slate-950"
             >
               {authLoading ? (
                 <RefreshCw size={14} className="animate-spin" />
@@ -576,20 +576,20 @@ export default function App() {
 
   // Active Game screen
   return (
-    <div className="min-h-screen bg-[#070a0f] text-slate-100 font-sans selection:bg-red-500/30 selection:text-red-200">
+    <div className="min-h-screen bg-[#070a0f] text-slate-100 font-sans selection:bg-amber-500/30 selection:text-amber-200">
       {/* Header Bar */}
       <header className="sticky top-0 z-30 border-b border-slate-900 bg-[#0a0d14]/90 backdrop-blur-md px-4 py-3">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           
           {/* Logo Brand */}
           <div className="flex items-center gap-2">
-            <div className="rounded-lg bg-red-600 p-2 text-slate-950 animate-pulse shadow-md shadow-red-600/20">
+            <div className="rounded-lg bg-amber-500 p-2 text-slate-950 animate-pulse shadow-md shadow-amber-500/20">
               <Plane size={18} className="rotate-45" />
             </div>
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="text-sm font-black uppercase tracking-wider text-slate-100">Aviator</span>
-                <span className="rounded bg-red-500/10 px-1 py-0.2 text-[9px] font-black text-red-500 border border-red-500/20">CRASH</span>
+                <span className="rounded bg-amber-500/10 px-1 py-0.2 text-[9px] font-black text-amber-500 border border-amber-500/20">CRASH</span>
               </div>
               <div className="text-[10px] text-slate-500 font-mono flex items-center gap-1">
                 <Server size={10} className="text-slate-600" />
@@ -618,7 +618,7 @@ export default function App() {
             {/* Logout button */}
             <button
               onClick={handleLogout}
-              className="rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-850 p-2 text-slate-400 hover:text-red-400 transition"
+              className="rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-850 p-2 text-slate-400 hover:text-amber-400 transition"
               title="Sign Out"
             >
               <LogOut size={15} />
