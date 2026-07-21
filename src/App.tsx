@@ -140,16 +140,41 @@ export default function App() {
 
   // Fetch / Verify Auth Profile on mount or token changes
   useEffect(() => {
-    if (!token) {
-      setCurrentUser(null);
-      return;
-    }
-
     const fetchProfile = async () => {
+      let currentToken = token;
+      if (!currentToken) {
+        // Automatically attempt login as the demo user if no token is stored yet
+        try {
+          const res = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: 'demo@demo.com', password: 'demo1234' })
+          });
+          const data = await res.json();
+          if (res.ok && data.token) {
+            localStorage.setItem('aviator_token', data.token);
+            setToken(data.token);
+            setCurrentUser(data.user);
+            setBalance(data.user.balance);
+            return;
+          }
+        } catch (err) {
+          console.warn('Failed to login as demo user via API, falling back to local simulation:', err);
+        }
+
+        // Bypassed fallback
+        const bypassToken = 'demo-bypass-token';
+        localStorage.setItem('aviator_token', bypassToken);
+        setToken(bypassToken);
+        setCurrentUser({ id: 1, username: 'demo', email: 'demo@demo.com', balance: 1000.0, isAdmin: false });
+        setBalance(1000.0);
+        return;
+      }
+
       try {
         const res = await fetch('/api/auth/me', {
           headers: {
-            'Authorization': `Bearer ${token}`
+            'Authorization': `Bearer ${currentToken}`
           }
         });
         const data = await res.json();
@@ -157,11 +182,18 @@ export default function App() {
           setCurrentUser(data.user);
           setBalance(data.user.balance);
         } else {
-          // Token expired or invalid
-          handleLogout();
+          // Token expired, invalid or auth server down: Fallback to local demo profile
+          const bypassToken = 'demo-bypass-token';
+          localStorage.setItem('aviator_token', bypassToken);
+          setToken(bypassToken);
+          setCurrentUser({ id: 1, username: 'demo', email: 'demo@demo.com', balance: 1000.0, isAdmin: false });
+          setBalance(1000.0);
         }
       } catch (err) {
-        console.error('Failed to verify session token:', err);
+        console.error('Failed to verify session token, falling back to local demo profile:', err);
+        // Fallback to demo user if fetching failed
+        setCurrentUser({ id: 1, username: 'demo', email: 'demo@demo.com', balance: 1000.0, isAdmin: false });
+        setBalance(1000.0);
       }
     };
 
